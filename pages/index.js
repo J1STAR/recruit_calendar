@@ -1,20 +1,45 @@
+import Calendar from '../components/calendar/calendar'
+import { useState } from 'react'
+import { Box, Container, Button } from '@chakra-ui/react'
+
 const Page = ({ data }) => {
+  const [date, setDate] = useState(new Date())
+
+  const handleMonthPlus = () => {
+    setDate(new Date(date.setMonth(date.getMonth() + 1)))
+  }
+  const handleMonthMinus = () => {
+    setDate(new Date(date.setMonth(date.getMonth() - 1)))
+  }
+
   return (
-    <div>
-      {data.map(item => (
-        <div key={item.id}>
-          <table>
-            <tbody>
-              <tr>
-                <td>{item.name}</td>
-                <td>{item.start_time}</td>
-                <td>{item.end_time}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </div>
+    <Box display="flex">
+      <Container maxW="15%" bg="gray">
+        Small Calendar
+      </Container>
+      <Container maxW="auto">
+        <Button m={3} colorScheme="blue" onClick={handleMonthPlus}>
+          {'<'}
+        </Button>
+        <Button m={3} colorScheme="blue" onClick={handleMonthMinus}>
+          {'>'}
+        </Button>
+        <Box fontSize={20}>{date.toDateString()}</Box>
+        {data
+          .filter(
+            item =>
+              ('0' + new Date(item.start_time).getMonth() + 1).slice(-2) ===
+                ('0' + date.getMonth() + 1).slice(-2) &&
+              new Date(item.start_time).getFullYear() === date.getFullYear()
+          )
+          .map(item => (
+            <div key={item.id}>
+              {item.name}
+              {item.start_time.split('T')[0]}
+            </div>
+          ))}
+      </Container>
+    </Box>
   )
 }
 export default Page
