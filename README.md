@@ -1,7 +1,7 @@
-1. 반응형 웹디자인
-
-- 데스크탑 : 달력
-- 모바일 : column 형 리스트
-
-2. SSG / SSR
-3.
+# recruit_calendar
+  - 자소설 닷컴 채용공고 
+  
+## 사용기술
+  - `ReactJS`
+  - `NextJS`
+  - `styled-components`
