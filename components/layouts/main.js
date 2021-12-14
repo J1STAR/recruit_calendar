@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Navbar from '../navbar'
-import { Box, Image } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 
 const Main = ({ children, router }) => {
   return (
@@ -11,7 +11,9 @@ const Main = ({ children, router }) => {
         <title>자소설 닷컴</title>
       </Head>
       <Navbar path={router.path} />
-      <Box pt={16}>{children}</Box>
+      <Box pt="64px" height="100vh">
+        {children}
+      </Box>
     </Box>
   )
 }

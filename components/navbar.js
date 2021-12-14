@@ -1,11 +1,11 @@
-import { Box, Image, Link } from '@chakra-ui/react'
+import { Box, Image, Link, Button } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import NavLink from './navLink'
 const Navbar = ({ path }) => {
   return (
     <Box
-      position="fixed"
       as="nav"
+      position="fixed"
       width="100%"
       zIndex="1"
       background="transparent"
@@ -41,6 +41,7 @@ const Navbar = ({ path }) => {
         >
           <NavLink path="/" text="로그인" />
           <NavLink path="/" text="기업서비스" />
+          <Button>채팅</Button>
         </Box>
       </Box>
     </Box>
