@@ -1,20 +1,19 @@
+import Calendar from '../components/calendar/calendar'
+import { useState } from 'react'
+import { Box, Container, Button } from '@chakra-ui/react'
+
 const Page = ({ data }) => {
+  const [date, setDate] = useState(new Date())
+  const monthly_data = data.filter(
+    item =>
+      ('0' + new Date(item.start_time).getMonth() + 1).slice(-2) ===
+        ('0' + date.getMonth() + 1).slice(-2) &&
+      new Date(item.start_time).getFullYear() === date.getFullYear()
+  )
   return (
-    <div>
-      {data.map(item => (
-        <div key={item.id}>
-          <table>
-            <tbody>
-              <tr>
-                <td>{item.name}</td>
-                <td>{item.start_time}</td>
-                <td>{item.end_time}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </div>
+    <Box display="flex" height="100%">
+      <Calendar data={monthly_data} date={date} setDate={setDate} />
+    </Box>
   )
 }
 export default Page
