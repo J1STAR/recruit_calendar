@@ -1,8 +1,14 @@
-import { Box, Button } from '@chakra-ui/react'
+import { Link, Box, useDisclosure } from '@chakra-ui/react'
+import { useState } from 'react'
+import styled from '@emotion/styled'
+import Start from './start'
+import End from './end'
+import ItemModal from './item-modal'
 const Calendar = ({ data, date, setDate }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [item, setItem] = useState(null)
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1)
   const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-  const lastMonthRes = new Date(date.getFullYear(), date.getMonth(), 0)
   const lastMonthResidual = [
     ...Array(
       new Date(date.getFullYear(), date.getMonth() - 1, 0).getDate()
@@ -26,70 +32,36 @@ const Calendar = ({ data, date, setDate }) => {
     setDate(new Date(date.setMonth(date.getMonth() - 1)))
   }
 
-  return (
-    <Box width="100%">
-      <Box
-        position="absolute"
-        height="80px"
-        left="0"
-        right="0"
-        textAlign="center"
-        marginLeft="auto"
-        marginRight="auto"
-        width="300px"
-        display="flex"
-        flexDirection="row"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Button m={3} colorScheme="blue" onClick={handleMonthMinus}>
-          {'<'}
-        </Button>
-        <Box>
-          {date.toLocaleString('default', { year: 'numeric', month: 'long' })}
-        </Box>
-        <Button m={3} colorScheme="blue" onClick={handleMonthPlus}>
-          {'>'}
-        </Button>
-      </Box>
+  const handleItemModal = e => {
+    const item_data = data.filter(item => item.id == e.target.id)[0]
+    setItem(item_data)
+    onOpen()
+  }
 
-      <Box
-        mt="80px"
-        display="flex"
-        flexDir="column"
-        gridGap={1}
-        width="100%"
-        overflowY="scroll"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: 'full'
-        }}
-      >
-        <Box display="grid" gridTemplateColumns="repeat(7,1fr)" gridGap={1}>
+  return (
+    <Wrapper>
+      <ItemModal isOpen={isOpen} onClose={onClose} item_data={item} />
+      <MonthController>
+        <DateArrow onClick={handleMonthMinus}>
+          <span>{'<'}</span>
+        </DateArrow>
+        <DateViewer>
+          {date.toLocaleString('default', { year: 'numeric', month: 'long' })}
+        </DateViewer>
+        <DateArrow onClick={handleMonthPlus}>
+          <span>{'>'}</span>
+        </DateArrow>
+      </MonthController>
+
+      <GridWrapper>
+        <GridContainer>
           {['SUN', 'MON', 'TUE', 'WED', 'THR', 'FRI', 'SAT'].map(day => (
-            <Box
-              justifyContent="center"
-              alignItems="center"
-              bgColor="grey"
-              display="flex"
-              width="auto"
-              key={day}
-            >
-              {day}
-            </Box>
+            <GridItemWeek key={day}>{day}</GridItemWeek>
           ))}
-        </Box>
-        <Box display="grid" gridTemplateColumns="repeat(7,1fr)" gridGap={1}>
+        </GridContainer>
+        <GridContainer>
           {lastMonthResidual.map(day => (
-            <Box
-              width="auto"
-              overflowX="hidden"
-              minHeight="150px"
-              key={day}
-              position="sticky"
-              top="0"
-            >
+            <GridItemContainer key={day}>
               <Box
                 justifyContent="center"
                 alignItems="center"
@@ -97,57 +69,203 @@ const Calendar = ({ data, date, setDate }) => {
                 bgColor="lightgrey"
               >
                 {day}
-              </Box>
-            </Box>
-          ))}
-          {[...Array(lastDay.getDate())].map((_, i) => (
-            <Box
-              width="auto"
-              overflowX="hidden"
-              minHeight="150px"
-              key={i}
-              position="sticky"
-              top="0"
-            >
-              <Box
-                justifyContent="center"
-                alignItems="center"
-                display="flex"
-                bgColor="lightgrey"
-              >
-                {i + 1}
               </Box>
               {/* filter daily data */}
-              {data
-                .filter(item => item.start_time.slice(8, 10) == i + 1)
-                .map(item => (
-                  <Box key={item.id}>{item.name}</Box>
-                ))}
-            </Box>
+              {data &&
+                data
+                  .filter(
+                    item =>
+                      item.start_time.slice(0, 4) == date.getFullYear() &&
+                      item.start_time.slice(5, 7) == date.getMonth() &&
+                      item.start_time.slice(8, 10) == day
+                  )
+                  .map(item => (
+                    <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                      <Start />
+                      {item.name}
+                    </Box>
+                  ))}
+              {data &&
+                data
+                  .filter(
+                    item =>
+                      item.end_time.slice(0, 4) == date.getFullYear() &&
+                      item.end_time.slice(5, 7) == date.getMonth() &&
+                      item.end_time.slice(8, 10) == day
+                  )
+                  .map(item => (
+                    <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                      <End />
+
+                      {item.name}
+                    </Box>
+                  ))}
+            </GridItemContainer>
+          ))}
+          {[...Array(lastDay.getDate())].map((_, i) => (
+            <span key={i}>
+              <GridItemContainer>
+                <Box
+                  justifyContent="center"
+                  alignItems="center"
+                  display="flex"
+                  bgColor="lightgrey"
+                >
+                  {i + 1}
+                </Box>
+                {/* filter daily data */}
+                {data &&
+                  data
+                    .filter(
+                      item =>
+                        item.start_time.slice(0, 4) == date.getFullYear() &&
+                        item.start_time.slice(5, 7) == date.getMonth() + 1 &&
+                        item.start_time.slice(8, 10) == i + 1
+                    )
+                    .map(item => (
+                      <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                        <Start />
+                        {item.name}
+                      </Box>
+                    ))}
+                {data &&
+                  data
+                    .filter(
+                      item =>
+                        item.end_time.slice(0, 4) == date.getFullYear() &&
+                        item.end_time.slice(5, 7) == date.getMonth() + 1 &&
+                        item.end_time.slice(8, 10) == i + 1
+                    )
+                    .map(item => (
+                      <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                        <End />
+
+                        {item.name}
+                      </Box>
+                    ))}
+              </GridItemContainer>
+            </span>
           ))}
           {nextMonthResidual.map(day => (
-            <Box
-              width="auto"
-              overflowX="hidden"
-              minHeight="150px"
-              key={day}
-              position="sticky"
-              top="0"
-            >
+            <GridItemContainer key={day}>
               <Box
                 justifyContent="center"
                 alignItems="center"
                 display="flex"
                 bgColor="lightgrey"
+                position="sticky"
+                top="0"
               >
                 {day}
               </Box>
-            </Box>
+              {data &&
+                data
+                  .filter(
+                    item =>
+                      item.start_time.slice(0, 4) == date.getFullYear() &&
+                      item.start_time.slice(5, 7) == date.getMonth() + 2 &&
+                      item.start_time.slice(8, 10) == day
+                  )
+                  .map(item => (
+                    <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                      <Start />
+                      {item.name}
+                    </Box>
+                  ))}
+              {data &&
+                data
+                  .filter(
+                    item =>
+                      item.end_time.slice(0, 4) == date.getFullYear() &&
+                      item.end_time.slice(5, 7) == date.getMonth() + 2 &&
+                      item.end_time.slice(8, 10) == day
+                  )
+                  .map(item => (
+                    <Box key={item.id} id={item.id} onClick={handleItemModal}>
+                      <End />
+
+                      {item.name}
+                    </Box>
+                  ))}
+            </GridItemContainer>
           ))}
-        </Box>
-      </Box>
-    </Box>
+        </GridContainer>
+      </GridWrapper>
+    </Wrapper>
   )
 }
 
 export default Calendar
+
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  padding: 0 100px 0 100px;
+`
+const MonthController = styled.div`
+  position: absolute;
+  height: 80px;
+  left: 0;
+  right: 0;
+  /* text-align: center; */
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  display: flex;
+  flex-direction: row;
+  justify-contents: center;
+  align-items: center;
+`
+
+const DateArrow = styled(Link)`
+  padding: 3;
+  font-size: 25px;
+  font-weight: bold;
+  color: gray;
+  &:hover {
+    text-decoration: none;
+  }
+`
+
+const DateViewer = styled(Box)`
+  width: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 30px;
+  color: #ff6813;
+  font-weight: bold;
+`
+
+const GridWrapper = styled(Box)`
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  grid-gap: 1px;
+  width: 100%;
+  height: 80vh;
+  overflow-y: scroll;
+  flex-direction: column;
+`
+
+const GridContainer = styled(Box)`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 1px;
+`
+
+const GridItemWeek = styled(Box)`
+  display: flex;
+  width: auto;
+  background: grey;
+  align-items: center;
+  justify-content: center;
+`
+
+const GridItemContainer = styled(Box)`
+  width: auto;
+  overflow-x: hidden;
+  min-height: 150px;
+`
+const GridItemDay = styled(Box)``

@@ -1,18 +1,22 @@
-import { ColorModeScript } from '@chakra-ui/react'
 import NextDocument, { Html, Head, Main, NextScript } from 'next/document'
-import theme from '../lib/theme'
-
+import styled from '@emotion/styled'
 export default class Document extends NextDocument {
   render() {
     return (
       <Html lang="ko">
         <Head />
-        <body>
-          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <BodyWrapper>
           <Main />
           <NextScript />
-        </body>
+        </BodyWrapper>
       </Html>
     )
   }
 }
+
+const BodyWrapper = styled.body`
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+`
